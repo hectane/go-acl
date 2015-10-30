@@ -7,10 +7,10 @@ import (
 	"unsafe"
 )
 
-// Change the permissions of the specified object. Only the nine
-// least-significant bytes are used, allowing access by the object's owner, the
-// object's group, and any other user to be explicitly controlled.
-func Chmod(object string, mode os.FileMode) error {
+// Change the permissions of the specified file. Only the nine
+// least-significant bytes are used, allowing access by the file's owner, the
+// file's group, and any other user to be explicitly controlled.
+func Chmod(name string, mode os.FileMode) error {
 	var (
 		sidOwner    = make([]byte, SECURITY_MAX_SID_SIZE)
 		sidOwnerLen = uint32(SECURITY_MAX_SID_SIZE)
@@ -65,7 +65,7 @@ func Chmod(object string, mode os.FileMode) error {
 	}
 	defer windows.LocalFree((windows.Handle)(unsafe.Pointer(acl)))
 	return SetNamedSecurityInfo(
-		object,
+		name,
 		SE_FILE_OBJECT,
 		DACL_SECURITY_INFORMATION|PROTECTED_DACL_SECURITY_INFORMATION,
 		nil,
