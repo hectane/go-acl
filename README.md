@@ -4,7 +4,14 @@ Manipulating ACLs (Access Control Lists) on Windows is difficult. go-acl wraps t
 
 ### Examples
 
-TODO
+Probably the most commonly used function in this package is `Chmod`:
+
+    import "github.com/hectane/go-acl"
+
+    err := acl.Chmod("C:\\path\\to\\file.txt", 0755)
+    if err != nil {
+        panic(err)
+    }
 
 ### Using the API Directly
 
