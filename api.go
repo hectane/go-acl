@@ -10,6 +10,10 @@ const (
 	ERROR_SUCCESS = 0
 )
 
+const (
+	SECURITY_MAX_SID_SIZE = 68
+)
+
 // SE_OBJECT_TYPE enumeration.
 const (
 	SE_UNKNOWN_OBJECT_TYPE = iota
