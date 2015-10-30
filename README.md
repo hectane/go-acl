@@ -1,5 +1,8 @@
 ## go-acl
 
+[![GoDoc](https://godoc.org/github.com/hectane/go-acl?status.svg)](https://godoc.org/github.com/hectane/go-acl)
+[![MIT License](http://img.shields.io/badge/license-MIT-9370d8.svg?style=flat)](http://opensource.org/licenses/MIT)
+
 Manipulating ACLs (Access Control Lists) on Windows is difficult. go-acl wraps the Windows API functions that control access to objects, simplifying the process.
 
 ### Examples
