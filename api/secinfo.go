@@ -6,6 +6,7 @@ import (
 	"unsafe"
 )
 
+// https://msdn.microsoft.com/en-us/library/windows/desktop/aa379593.aspx
 const (
 	SE_UNKNOWN_OBJECT_TYPE = iota
 	SE_FILE_OBJECT
@@ -22,6 +23,7 @@ const (
 	SE_REGISTRY_WOW64_32KEY
 )
 
+// https://msdn.microsoft.com/en-us/library/windows/desktop/aa379573.aspx
 const (
 	OWNER_SECURITY_INFORMATION               = 0x00001
 	GROUP_SECURITY_INFORMATION               = 0x00002
@@ -44,11 +46,8 @@ var (
 	procSetNamedSecurityInfoW = advapi32.MustFindProc("SetNamedSecurityInfoW")
 )
 
-type ACL struct{}
-
-// Retrieve information from the security descriptor for an object. Note that
-// secDesc must be freed using windows.LocalFree().
-func GetNamedSecurityInfo(objectName string, objectType int32, secInfo uint32, owner, group **windows.SID, dacl, sacl **ACL, secDesc *windows.Handle) error {
+// https://msdn.microsoft.com/en-us/library/windows/desktop/aa446645.aspx
+func GetNamedSecurityInfo(objectName string, objectType int32, secInfo uint32, owner, group **windows.SID, dacl, sacl, secDesc *windows.Handle) error {
 	ret, _, err := procGetNamedSecurityInfoW.Call(
 		uintptr(unsafe.Pointer(windows.StringToUTF16Ptr(objectName))),
 		uintptr(objectType),
@@ -65,16 +64,16 @@ func GetNamedSecurityInfo(objectName string, objectType int32, secInfo uint32, o
 	return nil
 }
 
-// Set information in the security descriptor for an object.
-func SetNamedSecurityInfo(objectName string, objectType int32, secInfo uint32, owner, group *windows.SID, dacl, sacl *ACL) error {
+// https://msdn.microsoft.com/en-us/library/windows/desktop/aa379579.aspx
+func SetNamedSecurityInfo(objectName string, objectType int32, secInfo uint32, owner, group *windows.SID, dacl, sacl windows.Handle) error {
 	ret, _, err := procSetNamedSecurityInfoW.Call(
 		uintptr(unsafe.Pointer(windows.StringToUTF16Ptr(objectName))),
 		uintptr(objectType),
 		uintptr(secInfo),
 		uintptr(unsafe.Pointer(owner)),
 		uintptr(unsafe.Pointer(group)),
-		uintptr(unsafe.Pointer(dacl)),
-		uintptr(unsafe.Pointer(sacl)),
+		uintptr(dacl),
+		uintptr(sacl),
 	)
 	if ret != 0 {
 		return err
