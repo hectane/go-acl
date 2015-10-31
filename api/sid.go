@@ -110,7 +110,6 @@ const (
 
 var (
 	procCreateWellKnownSid = advapi32.MustFindProc("CreateWellKnownSid")
-	procLookupAccountSidW  = advapi32.MustFindProc("LookupAccountSidW")
 )
 
 // Storage for a SID. Although a SID is an opaque data structure, some API

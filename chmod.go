@@ -1,6 +1,7 @@
 package acl
 
 import (
+	"github.com/hectane/go-acl/api"
 	"golang.org/x/sys/windows"
 
 	"os"
@@ -11,21 +12,16 @@ import (
 // least-significant bytes are used, allowing access by the file's owner, the
 // file's group, and any other user to be explicitly controlled.
 func Chmod(name string, mode os.FileMode) error {
-	var (
-		sidOwner    = make([]byte, SECURITY_MAX_SID_SIZE)
-		sidOwnerLen = uint32(SECURITY_MAX_SID_SIZE)
-		sidGroup    = make([]byte, SECURITY_MAX_SID_SIZE)
-		sidGroupLen = uint32(SECURITY_MAX_SID_SIZE)
-		sidWorld    = make([]byte, SECURITY_MAX_SID_SIZE)
-		sidWorldLen = uint32(SECURITY_MAX_SID_SIZE)
-	)
-	if err := CreateWellKnownSid(WinCreatorOwnerSid, nil, (*windows.SID)(unsafe.Pointer(&sidOwner[0])), &sidOwnerLen); err != nil {
+	sidOwner, err := api.CreateWellKnownSid(api.WinCreatorOwnerSid, nil)
+	if err != nil {
 		return err
 	}
-	if err := CreateWellKnownSid(WinCreatorGroupSid, nil, (*windows.SID)(unsafe.Pointer(&sidGroup[0])), &sidGroupLen); err != nil {
+	sidGroup, err := api.CreateWellKnownSid(api.WinCreatorGroupSid, nil)
+	if err != nil {
 		return err
 	}
-	if err := CreateWellKnownSid(WinWorldSid, nil, (*windows.SID)(unsafe.Pointer(&sidWorld[0])), &sidWorldLen); err != nil {
+	sidWorld, err := api.CreateWellKnownSid(api.WinWorldSid, nil)
+	if err != nil {
 		return err
 	}
 	var (
@@ -36,7 +32,7 @@ func Chmod(name string, mode os.FileMode) error {
 				Inheritance:       NO_INHERITANCE,
 				Trustee: Trustee{
 					TrusteeForm: TRUSTEE_IS_SID,
-					Name:        (*uint16)(unsafe.Pointer(&sidOwner[0])),
+					Name:        (*uint16)(unsafe.Pointer(sidOwner)),
 				},
 			},
 			{
@@ -45,7 +41,7 @@ func Chmod(name string, mode os.FileMode) error {
 				Inheritance:       NO_INHERITANCE,
 				Trustee: Trustee{
 					TrusteeForm: TRUSTEE_IS_SID,
-					Name:        (*uint16)(unsafe.Pointer(&sidGroup[0])),
+					Name:        (*uint16)(unsafe.Pointer(sidGroup)),
 				},
 			},
 			{
@@ -54,7 +50,7 @@ func Chmod(name string, mode os.FileMode) error {
 				Inheritance:       NO_INHERITANCE,
 				Trustee: Trustee{
 					TrusteeForm: TRUSTEE_IS_SID,
-					Name:        (*uint16)(unsafe.Pointer(&sidWorld[0])),
+					Name:        (*uint16)(unsafe.Pointer(sidWorld)),
 				},
 			},
 		}
