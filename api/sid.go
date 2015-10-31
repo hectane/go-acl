@@ -137,12 +137,15 @@ type SID struct {
 // Create a SID from a well-known SID type. The sidDomain parameter identifies
 // the domain to use and may be nil for the local computer.
 func CreateWellKnownSid(sidType int32, sidDomain *SID) (*SID, error) {
-	var sid SID
+	var (
+		sid    SID
+		sidLen = uint32(unsafe.Sizeof(sid))
+	)
 	ret, _, err := procCreateWellKnownSid.Call(
 		uintptr(sidType),
 		uintptr(unsafe.Pointer(sidDomain)),
 		uintptr(unsafe.Pointer(&sid)),
-		uintptr(unsafe.Pointer(unsafe.Sizeof(sid))),
+		uintptr(unsafe.Pointer(&sidLen)),
 	)
 	if ret == 0 {
 		return nil, err
