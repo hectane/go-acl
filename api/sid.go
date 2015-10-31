@@ -108,19 +108,6 @@ const (
 	WinCapabilityRemovableStorageSid            = 94
 )
 
-const (
-	SidTypeUser = iota + 1
-	SidTypeGroup
-	SidTypeDomain
-	SidTypeAlias
-	SidTypeWellKnownGroup
-	SidTypeDeletedAccount
-	SidTypeInvalid
-	SidTypeUnknown
-	SidTypeComputer
-	SidTypeLabel
-)
-
 var (
 	procCreateWellKnownSid = advapi32.MustFindProc("CreateWellKnownSid")
 	procLookupAccountSidW  = advapi32.MustFindProc("LookupAccountSidW")
@@ -156,43 +143,4 @@ func CreateWellKnownSid(sidType int32, sidDomain *SID) (*SID, error) {
 // Obtain a pointer to the SID.
 func (s *SID) Pointer() *windows.SID {
 	return (*windows.SID)(unsafe.Pointer(s))
-}
-
-// Lookup the name and domain for the SID. The systemName parameter specifies
-// the target computer and is optional. The returned values are the name,
-// domain, and type of the SID. The underlying API function is invoked twice -
-// once to obtain the required buffer sizes and the second time with the
-// correctly sized buffers.
-func (s *SID) Lookup(systemName string) (string, string, int32, error) {
-	var (
-		nameLen   uint32
-		domainLen uint32
-		use       int32
-	)
-	ret, _, err := procLookupAccountSidW.Call(
-		uintptr(unsafe.Pointer(windows.StringToUTF16Ptr(systemName))),
-		uintptr(unsafe.Pointer(s)),
-		uintptr(0),
-		uintptr(unsafe.Pointer(&nameLen)),
-		uintptr(0),
-		uintptr(unsafe.Pointer(&domainLen)),
-		uintptr(unsafe.Pointer(&use)),
-	)
-	var (
-		name   = make([]uint16, nameLen)
-		domain = make([]uint16, domainLen)
-	)
-	ret, _, err = procLookupAccountSidW.Call(
-		uintptr(unsafe.Pointer(windows.StringToUTF16Ptr(systemName))),
-		uintptr(unsafe.Pointer(s)),
-		uintptr(unsafe.Pointer(&name[0])),
-		uintptr(unsafe.Pointer(&nameLen)),
-		uintptr(unsafe.Pointer(&domain[0])),
-		uintptr(unsafe.Pointer(&domainLen)),
-		uintptr(unsafe.Pointer(&use)),
-	)
-	if ret == 0 {
-		return "", "", 0, err
-	}
-	return windows.UTF16ToString(name), windows.UTF16ToString(domain), use, err
 }
