@@ -41,6 +41,7 @@ const (
 
 var (
 	procGetNamedSecurityInfoW = advapi32.MustFindProc("GetNamedSecurityInfoW")
+	procSetNamedSecurityInfoW = advapi32.MustFindProc("SetNamedSecurityInfoW")
 )
 
 type ACL struct{}
@@ -57,6 +58,23 @@ func GetNamedSecurityInfo(objectName string, objectType int32, secInfo uint32, o
 		uintptr(unsafe.Pointer(dacl)),
 		uintptr(unsafe.Pointer(sacl)),
 		uintptr(unsafe.Pointer(secDesc)),
+	)
+	if ret != 0 {
+		return err
+	}
+	return nil
+}
+
+// Set information in the security descriptor for an object.
+func SetNamedSecurityInfo(objectName string, objectType int32, secInfo uint32, owner, group *windows.SID, dacl, sacl *ACL) error {
+	ret, _, err := procSetNamedSecurityInfoW.Call(
+		uintptr(unsafe.Pointer(windows.StringToUTF16Ptr(objectName))),
+		uintptr(objectType),
+		uintptr(secInfo),
+		uintptr(unsafe.Pointer(owner)),
+		uintptr(unsafe.Pointer(group)),
+		uintptr(unsafe.Pointer(dacl)),
+		uintptr(unsafe.Pointer(sacl)),
 	)
 	if ret != 0 {
 		return err

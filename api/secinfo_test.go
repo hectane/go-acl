@@ -44,3 +44,31 @@ func TestGetNamedSecurityInfo(t *testing.T) {
 		t.Fatal("SID of file does not match SID of current process")
 	}
 }
+
+func TestSetNamedSecurityInfo(t *testing.T) {
+	f, err := ioutil.TempFile(os.TempDir(), "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(f.Name())
+	token, err := windows.OpenCurrentProcessToken()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer token.Close()
+	u, err := token.GetTokenUser()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = SetNamedSecurityInfo(
+		f.Name(),
+		SE_FILE_OBJECT,
+		OWNER_SECURITY_INFORMATION,
+		u.User.Sid,
+		nil,
+		nil,
+		nil,
+	); err != nil {
+		t.Fatal(err)
+	}
+}
