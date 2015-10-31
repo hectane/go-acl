@@ -1,0 +1,34 @@
+package api
+
+import (
+	"golang.org/x/sys/windows"
+
+	"io/ioutil"
+	"os"
+	"testing"
+)
+
+func TestGetNamedSecurityInfo(t *testing.T) {
+	f, err := ioutil.TempFile(os.TempDir(), "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(f.Name())
+	var (
+		ownerSid *windows.SID
+		secDesc  windows.Handle
+	)
+	if err = GetNamedSecurityInfo(
+		f.Name(),
+		SE_FILE_OBJECT,
+		OWNER_SECURITY_INFORMATION,
+		&ownerSid,
+		nil,
+		nil,
+		nil,
+		&secDesc,
+	); err != nil {
+		t.Fatal(err)
+	}
+	defer windows.LocalFree(secDesc)
+}
