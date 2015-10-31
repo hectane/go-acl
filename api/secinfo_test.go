@@ -31,4 +31,16 @@ func TestGetNamedSecurityInfo(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer windows.LocalFree(secDesc)
+	token, err := windows.OpenCurrentProcessToken()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer token.Close()
+	u, err := token.GetTokenUser()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !windows.EqualSid(ownerSid, u.User.Sid) {
+		t.Fatal("SID of file does not match SID of current process")
+	}
 }
