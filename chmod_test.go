@@ -7,11 +7,11 @@ import (
 )
 
 func TestChmod(t *testing.T) {
-	f, err := ioutil.TempDir(os.TempFile(), "")
+	f, err := ioutil.TempFile(os.TempDir(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(f)
+	defer os.Remove(f.Name())
 	if err := Chmod(f.Name(), 0); err != nil {
 		t.Fatal(err)
 	}
