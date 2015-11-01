@@ -12,16 +12,36 @@ import (
 // least-significant bytes are used, allowing access by the file's owner, the
 // file's group, and any other user to be explicitly controlled.
 func Chmod(name string, mode os.FileMode) error {
-	sidOwner, err := api.CreateWellKnownSid(api.WinCreatorOwnerSid, nil)
-	if err != nil {
+	var (
+		sidOwner    = make([]byte, api.SECURITY_MAX_SID_SIZE)
+		sidOwnerLen = uint32(unsafe.Sizeof(sidOwner))
+		sidGroup    = make([]byte, api.SECURITY_MAX_SID_SIZE)
+		sidGroupLen = uint32(unsafe.Sizeof(sidGroup))
+		sidWorld    = make([]byte, api.SECURITY_MAX_SID_SIZE)
+		sidWorldLen = uint32(unsafe.Sizeof(sidWorld))
+	)
+	if err := api.CreateWellKnownSid(
+		api.WinCreatorOwnerSid,
+		nil,
+		(*windows.SID)(unsafe.Pointer(&sidOwner[0])),
+		&sidOwnerLen,
+	); err != nil {
 		return err
 	}
-	sidGroup, err := api.CreateWellKnownSid(api.WinCreatorGroupSid, nil)
-	if err != nil {
+	if err := api.CreateWellKnownSid(
+		api.WinCreatorGroupSid,
+		nil,
+		(*windows.SID)(unsafe.Pointer(&sidGroup[0])),
+		&sidGroupLen,
+	); err != nil {
 		return err
 	}
-	sidWorld, err := api.CreateWellKnownSid(api.WinWorldSid, nil)
-	if err != nil {
+	if err := api.CreateWellKnownSid(
+		api.WinWorldSid,
+		nil,
+		(*windows.SID)(unsafe.Pointer(&sidWorld[0])),
+		&sidWorldLen,
+	); err != nil {
 		return err
 	}
 	var (
@@ -32,7 +52,7 @@ func Chmod(name string, mode os.FileMode) error {
 				Inheritance:       api.NO_INHERITANCE,
 				Trustee: api.Trustee{
 					TrusteeForm: api.TRUSTEE_IS_SID,
-					Name:        (*uint16)(unsafe.Pointer(sidOwner)),
+					Name:        (*uint16)(unsafe.Pointer(&sidOwner[0])),
 				},
 			},
 			{
@@ -41,7 +61,7 @@ func Chmod(name string, mode os.FileMode) error {
 				Inheritance:       api.NO_INHERITANCE,
 				Trustee: api.Trustee{
 					TrusteeForm: api.TRUSTEE_IS_SID,
-					Name:        (*uint16)(unsafe.Pointer(sidGroup)),
+					Name:        (*uint16)(unsafe.Pointer(&sidGroup[0])),
 				},
 			},
 			{
@@ -50,7 +70,7 @@ func Chmod(name string, mode os.FileMode) error {
 				Inheritance:       api.NO_INHERITANCE,
 				Trustee: api.Trustee{
 					TrusteeForm: api.TRUSTEE_IS_SID,
-					Name:        (*uint16)(unsafe.Pointer(sidWorld)),
+					Name:        (*uint16)(unsafe.Pointer(&sidWorld[0])),
 				},
 			},
 		}
