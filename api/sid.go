@@ -7,10 +7,6 @@ import (
 )
 
 const (
-	SECURITY_MAX_SID_SIZE = 68
-)
-
-const (
 	WinNullSid                                  = 0
 	WinWorldSid                                 = 1
 	WinLocalSid                                 = 2
@@ -112,34 +108,16 @@ var (
 	procCreateWellKnownSid = advapi32.MustFindProc("CreateWellKnownSid")
 )
 
-// Storage for a SID. Although a SID is an opaque data structure, some API
-// functions require an allocated buffer to be provided and therefore a native
-// type needs to exist to manage access to the buffer. The Pointer() method can
-// be used to convert it to a *windows.SID.
-type SID struct {
-	b [SECURITY_MAX_SID_SIZE]byte
-}
-
-// Create a SID from a well-known SID type. The sidDomain parameter identifies
-// the domain to use and may be nil for the local computer.
-func CreateWellKnownSid(sidType int32, sidDomain *SID) (*SID, error) {
-	var (
-		sid    SID
-		sidLen = uint32(unsafe.Sizeof(sid))
-	)
+// https://msdn.microsoft.com/en-us/library/windows/desktop/aa446585.aspx
+func CreateWellKnownSid(sidType int32, sidDomain, sid *windows.SID, sidLen *uint32) error {
 	ret, _, err := procCreateWellKnownSid.Call(
 		uintptr(sidType),
 		uintptr(unsafe.Pointer(sidDomain)),
-		uintptr(unsafe.Pointer(&sid)),
-		uintptr(unsafe.Pointer(&sidLen)),
+		uintptr(unsafe.Pointer(sid)),
+		uintptr(unsafe.Pointer(sidLen)),
 	)
 	if ret == 0 {
-		return nil, err
+		return err
 	}
-	return &sid, nil
-}
-
-// Obtain a pointer to the SID.
-func (s *SID) Pointer() *windows.SID {
-	return (*windows.SID)(unsafe.Pointer(s))
+	return nil
 }
