@@ -18,16 +18,18 @@ Probably the most commonly used function in this package is `Chmod`:
 
 ### Using the API Directly
 
-go-acl exposes the individual Windows API functions that are used to manipulate ACLs. For example, to retrieve the current owner of a file:
+go-acl's `api` package exposes the individual Windows API functions that are used to manipulate ACLs. For example, to retrieve the current owner of a file:
+
+    import "github.com/hectane/go-acl/api"
 
     var (
         owner   *windows.SID
         secDesc windows.Handle
     )
-    err := acl.GetNamedSecurityInfo(
+    err := api.GetNamedSecurityInfo(
         "C:\\path\\to\\file.txt",
-        acl.SE_FILE_OBJECT,
-        acl.OWNER_SECURITY_INFORMATION,
+        api.SE_FILE_OBJECT,
+        api.OWNER_SECURITY_INFORMATION,
         &owner,
         nil,
         nil,
