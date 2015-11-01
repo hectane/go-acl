@@ -6,10 +6,12 @@ import (
 	"unsafe"
 )
 
+// https://msdn.microsoft.com/en-us/library/windows/desktop/ee207397.aspx
 const (
 	SECURITY_MAX_SID_SIZE = 68
 )
 
+// https://msdn.microsoft.com/en-us/library/windows/desktop/aa379650.aspx
 const (
 	WinNullSid                                  = 0
 	WinWorldSid                                 = 1
