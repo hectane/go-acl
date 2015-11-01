@@ -66,8 +66,8 @@ func TestSetNamedSecurityInfo(t *testing.T) {
 		OWNER_SECURITY_INFORMATION,
 		u.User.Sid,
 		nil,
-		windows.InvalidHandle,
-		windows.InvalidHandle,
+		0,
+		0,
 	); err != nil {
 		t.Fatal(err)
 	}
