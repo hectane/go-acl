@@ -7,6 +7,10 @@ import (
 )
 
 const (
+	SECURITY_MAX_SID_SIZE = 68
+)
+
+const (
 	WinNullSid                                  = 0
 	WinWorldSid                                 = 1
 	WinLocalSid                                 = 2

@@ -7,10 +7,6 @@ import (
 	"unsafe"
 )
 
-const (
-	SECURITY_MAX_SID_SIZE = 68
-)
-
 func TestSIDLookup(t *testing.T) {
 	var (
 		sid    = make([]byte, SECURITY_MAX_SID_SIZE)
