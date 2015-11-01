@@ -25,48 +25,48 @@ func Chmod(name string, mode os.FileMode) error {
 		return err
 	}
 	var (
-		entries = []ExplicitAccess{
+		entries = []api.ExplicitAccess{
 			{
 				AccessPermissions: (uint32(mode) & 0700) << 23,
-				AccessMode:        GRANT_ACCESS,
-				Inheritance:       NO_INHERITANCE,
-				Trustee: Trustee{
-					TrusteeForm: TRUSTEE_IS_SID,
+				AccessMode:        api.GRANT_ACCESS,
+				Inheritance:       api.NO_INHERITANCE,
+				Trustee: api.Trustee{
+					TrusteeForm: api.TRUSTEE_IS_SID,
 					Name:        (*uint16)(unsafe.Pointer(sidOwner)),
 				},
 			},
 			{
 				AccessPermissions: (uint32(mode) & 0070) << 26,
-				AccessMode:        GRANT_ACCESS,
-				Inheritance:       NO_INHERITANCE,
-				Trustee: Trustee{
-					TrusteeForm: TRUSTEE_IS_SID,
+				AccessMode:        api.GRANT_ACCESS,
+				Inheritance:       api.NO_INHERITANCE,
+				Trustee: api.Trustee{
+					TrusteeForm: api.TRUSTEE_IS_SID,
 					Name:        (*uint16)(unsafe.Pointer(sidGroup)),
 				},
 			},
 			{
 				AccessPermissions: (uint32(mode) & 0007) << 29,
-				AccessMode:        GRANT_ACCESS,
-				Inheritance:       NO_INHERITANCE,
-				Trustee: Trustee{
-					TrusteeForm: TRUSTEE_IS_SID,
+				AccessMode:        api.GRANT_ACCESS,
+				Inheritance:       api.NO_INHERITANCE,
+				Trustee: api.Trustee{
+					TrusteeForm: api.TRUSTEE_IS_SID,
 					Name:        (*uint16)(unsafe.Pointer(sidWorld)),
 				},
 			},
 		}
-		acl *ACL
+		acl windows.Handle
 	)
-	if err := SetEntriesInAcl(entries, nil, &acl); err != nil {
+	if err := api.SetEntriesInAcl(entries, 0, &acl); err != nil {
 		return err
 	}
 	defer windows.LocalFree((windows.Handle)(unsafe.Pointer(acl)))
-	return SetNamedSecurityInfo(
+	return api.SetNamedSecurityInfo(
 		name,
-		SE_FILE_OBJECT,
-		DACL_SECURITY_INFORMATION|PROTECTED_DACL_SECURITY_INFORMATION,
+		api.SE_FILE_OBJECT,
+		api.DACL_SECURITY_INFORMATION|api.PROTECTED_DACL_SECURITY_INFORMATION,
 		nil,
 		nil,
 		acl,
-		nil,
+		0,
 	)
 }
