@@ -7,11 +7,11 @@ import (
 	"unsafe"
 )
 
-// Grant permission for a file to the provided SIDs. The excl parameter
-// determines whether the new permissions replace existing ones.
-func Grant(name string, accessPermissions uint32, excl bool, sids ...*windows.SID) error {
+// Grant permission for a file to the provided SIDs. The new access control
+// entries will replace existing ones unless the replace parameter is false.
+func Grant(name string, accessPermissions uint32, replace bool, sids ...*windows.SID) error {
 	var oldAcl windows.Handle
-	if !excl {
+	if !replace {
 		var secDesc windows.Handle
 		api.GetNamedSecurityInfo(
 			name,
