@@ -10,5 +10,7 @@ install:
   - go env
   - go get -t -v ./...
 
+build: off
+
 test_script:
   - go test -v ./...
