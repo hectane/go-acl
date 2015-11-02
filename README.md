@@ -1,5 +1,6 @@
 ## go-acl
 
+[![Build status](https://ci.appveyor.com/api/projects/status/rbdyu7c39o2j0ru9?svg=true)](https://ci.appveyor.com/project/nathan-osman/go-acl)
 [![GoDoc](https://godoc.org/github.com/hectane/go-acl?status.svg)](https://godoc.org/github.com/hectane/go-acl)
 [![MIT License](http://img.shields.io/badge/license-MIT-9370d8.svg?style=flat)](http://opensource.org/licenses/MIT)
 
