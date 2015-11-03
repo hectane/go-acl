@@ -7,9 +7,9 @@ import (
 	"unsafe"
 )
 
-// Grant permission for a file to the provided SIDs. The new access control
-// entries will replace existing ones unless the replace parameter is false.
-func Grant(name string, accessPermissions uint32, replace bool, sids ...*windows.SID) error {
+// Grant the specified permissions for a file. The new access control entries
+// will replace existing ones unless the replace parameter is false.
+func Grant(name string, replace bool, entries ...api.ExplicitAccess) error {
 	var oldAcl windows.Handle
 	if !replace {
 		var secDesc windows.Handle
@@ -24,18 +24,6 @@ func Grant(name string, accessPermissions uint32, replace bool, sids ...*windows
 			&secDesc,
 		)
 		defer windows.LocalFree(secDesc)
-	}
-	var entries = make([]api.ExplicitAccess, len(sids))
-	for i, sid := range sids {
-		entries[i] = api.ExplicitAccess{
-			AccessPermissions: windows.GENERIC_ALL,
-			AccessMode:        api.GRANT_ACCESS,
-			Inheritance:       api.SUB_CONTAINERS_AND_OBJECTS_INHERIT,
-			Trustee: api.Trustee{
-				TrusteeForm: api.TRUSTEE_IS_SID,
-				Name:        (*uint16)(unsafe.Pointer(sid)),
-			},
-		}
 	}
 	var acl windows.Handle
 	if err := api.SetEntriesInAcl(
@@ -55,5 +43,4 @@ func Grant(name string, accessPermissions uint32, replace bool, sids ...*windows
 		acl,
 		0,
 	)
-	return nil
 }
