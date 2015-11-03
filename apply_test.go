@@ -17,6 +17,7 @@ func TestApply(t *testing.T) {
 	if err := Apply(
 		f.Name(),
 		true,
+		true,
 		DenyName(windows.GENERIC_ALL, "CREATOR OWNER"),
 	); err != nil {
 		t.Fatal(err)

@@ -8,8 +8,9 @@ import (
 )
 
 // Apply the provided access control entries to a file. If the replace
-// parameter is true, existing entries will be overwritten.
-func Apply(name string, replace bool, entries ...api.ExplicitAccess) error {
+// parameter is true, existing entries will be overwritten. If the inherit
+// parameter is true, the file will inherit ACEs from its parent.
+func Apply(name string, replace, inherit bool, entries ...api.ExplicitAccess) error {
 	var oldAcl windows.Handle
 	if !replace {
 		var secDesc windows.Handle
@@ -34,10 +35,16 @@ func Apply(name string, replace bool, entries ...api.ExplicitAccess) error {
 		return err
 	}
 	defer windows.LocalFree((windows.Handle)(unsafe.Pointer(acl)))
+	var secInfo uint32
+	if !inherit {
+		secInfo = api.PROTECTED_DACL_SECURITY_INFORMATION
+	} else {
+		secInfo = api.UNPROTECTED_DACL_SECURITY_INFORMATION
+	}
 	return api.SetNamedSecurityInfo(
 		name,
 		api.SE_FILE_OBJECT,
-		api.DACL_SECURITY_INFORMATION,
+		api.DACL_SECURITY_INFORMATION|secInfo,
 		nil,
 		nil,
 		acl,

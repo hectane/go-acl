@@ -28,6 +28,7 @@ To grant read access to user "Alice" and deny write access to user "Bob":
     if err := acl.Apply(
         "C:\\path\\to\\file.txt",
         false,
+        false,
         acl.GrantName(windows.GENERIC_READ, "Alice"),
         acl.DenyName(windows.GENERIC_WRITE, "Bob"),
     ); err != nil {
