@@ -15,17 +15,17 @@ func TestChmod(t *testing.T) {
 	if err := Chmod(f.Name(), 0); err != nil {
 		t.Fatal(err)
 	}
-	d, err := os.Open(f.Name())
+	r, err := os.Open(f.Name())
 	if err == nil {
-		d.Close()
-		t.Fatal("owner able to access directory")
+		r.Close()
+		t.Fatal("owner able to access file", f.Name())
 	}
 	if err := Chmod(f.Name(), 0400); err != nil {
 		t.Fatal(err)
 	}
-	d, err = os.Open(f.Name())
+	r, err = os.Open(f.Name())
 	if err != nil {
-		t.Fatal("owner unable to access directory")
+		t.Fatal("owner unable to access file")
 	}
-	d.Close()
+	r.Close()
 }
