@@ -6,14 +6,31 @@
 
 Manipulating ACLs (Access Control Lists) on Windows is difficult. go-acl wraps the Windows API functions that control access to objects, simplifying the process.
 
+### Using the Package
+
+To use the package add the following imports:
+
+    import (
+        "github.com/hectane/go-acl"
+        "golang.org/x/sys/windows"
+    )
+
 ### Examples
 
 Probably the most commonly used function in this package is `Chmod`:
 
-    import "github.com/hectane/go-acl"
+    if err := acl.Chmod("C:\\path\\to\\file.txt", 0755); err != nil {
+        panic(err)
+    }
 
-    err := acl.Chmod("C:\\path\\to\\file.txt", 0755)
-    if err != nil {
+To grant read access to user "Alice" and deny write access to user "Bob":
+
+    if err := acl.Apply(
+        "C:\\path\\to\\file.txt",
+        false,
+        acl.GrantName(windows.GENERIC_READ, "Alice"),
+        acl.DenyName(windows.GENERIC_WRITE, "Bob"),
+    ); err != nil {
         panic(err)
     }
 
@@ -21,7 +38,10 @@ Probably the most commonly used function in this package is `Chmod`:
 
 go-acl's `api` package exposes the individual Windows API functions that are used to manipulate ACLs. For example, to retrieve the current owner of a file:
 
-    import "github.com/hectane/go-acl/api"
+    import (
+        "github.com/hectane/go-acl/api"
+        "golang.org/x/sys/windows"
+    )
 
     var (
         owner   *windows.SID
