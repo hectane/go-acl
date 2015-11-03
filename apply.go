@@ -7,9 +7,9 @@ import (
 	"unsafe"
 )
 
-// Grant the specified permissions for a file. The new access control entries
-// will replace existing ones unless the replace parameter is false.
-func Grant(name string, replace bool, entries ...api.ExplicitAccess) error {
+// Apply the provided access control entries to a file. If the replace
+// parameter is true, existing entries will be overwritten.
+func Apply(name string, replace bool, entries ...api.ExplicitAccess) error {
 	var oldAcl windows.Handle
 	if !replace {
 		var secDesc windows.Handle

@@ -9,13 +9,13 @@ import (
 	"testing"
 )
 
-func TestGrant(t *testing.T) {
+func TestApply(t *testing.T) {
 	f, err := ioutil.TempFile(os.TempDir(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer os.Remove(f.Name())
-	if err := Grant(
+	if err := Apply(
 		f.Name(),
 		true,
 		api.ExplicitAccess{
