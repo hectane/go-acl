@@ -1,7 +1,6 @@
 package acl
 
 import (
-	"github.com/hectane/go-acl/api"
 	"golang.org/x/sys/windows"
 
 	"io/ioutil"
@@ -18,15 +17,7 @@ func TestApply(t *testing.T) {
 	if err := Apply(
 		f.Name(),
 		true,
-		api.ExplicitAccess{
-			AccessPermissions: windows.GENERIC_ALL,
-			AccessMode:        api.DENY_ACCESS,
-			Inheritance:       api.NO_INHERITANCE,
-			Trustee: api.Trustee{
-				TrusteeForm: api.TRUSTEE_IS_NAME,
-				Name:        windows.StringToUTF16Ptr("CREATOR OWNER"),
-			},
-		},
+		DenyName(windows.GENERIC_ALL, "CREATOR OWNER"),
 	); err != nil {
 		t.Fatal(err)
 	}
