@@ -42,7 +42,7 @@ func Apply(name string, replace, inherit bool, owner, group *windows.SID, entrie
 		secInfo = api.UNPROTECTED_DACL_SECURITY_INFORMATION
 	}
 	if owner != nil {
-		secInfo += api.OWNER_SECURITY_INFORMATION
+		secInfo |= api.OWNER_SECURITY_INFORMATION
 	}
 	return api.SetNamedSecurityInfo(
 		name,
