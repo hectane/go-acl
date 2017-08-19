@@ -12,6 +12,8 @@ func Chmod(name string, mode os.FileMode) error {
 		name,
 		true,
 		false,
+		nil,
+		nil,
 		GrantName((uint32(mode)&0700)<<23, "CREATOR OWNER"),
 		GrantName((uint32(mode)&0070)<<26, "CREATOR GROUP"),
 		GrantName((uint32(mode)&0007)<<29, "EVERYONE"),

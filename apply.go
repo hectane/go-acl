@@ -1,7 +1,7 @@
 package acl
 
 import (
-	"github.com/hectane/go-acl/api"
+	"github.com/KuoKongQingYun/go-acl/api"
 	"golang.org/x/sys/windows"
 
 	"unsafe"
