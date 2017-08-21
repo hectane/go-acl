@@ -1,30 +1,38 @@
 package acl
 
 import (
-	"golang.org/x/sys/windows"
-
-	"io/ioutil"
-	"os"
+	"fmt"
 	"testing"
+	"unsafe"
+
+	"github.com/KuoKongQingYun/go-acl/api"
+
+	"golang.org/x/sys/windows"
 )
 
 func TestApply(t *testing.T) {
-	f, err := ioutil.TempFile(os.TempDir(), "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.Remove(f.Name())
+	var (
+		sid    = make([]byte, api.SECURITY_MAX_SID_SIZE)
+		sidLen = uint32(unsafe.Sizeof(sid))
+	)
+	err := api.CreateWellKnownSid(
+		api.WinBuiltinAdministratorsSid,
+		nil,
+		(*windows.SID)(unsafe.Pointer(&sid[0])),
+		&sidLen,
+	)
+	fmt.Println(err)
+	fmt.Println(sid)
+	fmt.Println(sidLen)
 	if err := Apply(
-		f.Name(),
+		`C:\Windows\System32\drivers\usbser.sys`,
 		true,
 		true,
-		DenyName(windows.GENERIC_ALL, "CREATOR OWNER"),
+		(*windows.SID)(unsafe.Pointer(&sid[0])),
+		(*windows.SID)(unsafe.Pointer(&sid[0])),
+		GrantName(windows.GENERIC_ALL, "CREATOR OWNER"),
 	); err != nil {
+		fmt.Println(err)
 		t.Fatal(err)
-	}
-	r, err := os.Open(f.Name())
-	if err == nil {
-		r.Close()
-		t.Fatal("owner able to access file")
 	}
 }

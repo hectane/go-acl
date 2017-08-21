@@ -1,7 +1,7 @@
 package acl
 
 import (
-	"github.com/hectane/go-acl/api"
+	"github.com/KuoKongQingYun/go-acl/api"
 	"golang.org/x/sys/windows"
 
 	"unsafe"
@@ -10,8 +10,14 @@ import (
 // Apply the provided access control entries to a file. If the replace
 // parameter is true, existing entries will be overwritten. If the inherit
 // parameter is true, the file will inherit ACEs from its parent.
-func Apply(name string, replace, inherit bool, entries ...api.ExplicitAccess) error {
-	var oldAcl windows.Handle
+func Apply(name string, replace, inherit bool, owner, group *windows.SID, entries ...api.ExplicitAccess) error {
+	var oldACL windows.Handle
+	if owner != nil {
+		pSecurityDescriptor := api.MakeNewSecurityDescriptor()
+		InitializeSecurityDescriptor(pSecurityDescriptor, api.SECURITY_DESCRIPTOR_REVISION)
+		SetSecurityDescriptorOwner(pSecurityDescriptor, owner, true)
+		SetFileSecurity(name, api.OWNER_SECURITY_INFORMATION, pSecurityDescriptor)
+	}
 	if !replace {
 		var secDesc windows.Handle
 		api.GetNamedSecurityInfo(
@@ -20,7 +26,7 @@ func Apply(name string, replace, inherit bool, entries ...api.ExplicitAccess) er
 			api.DACL_SECURITY_INFORMATION,
 			nil,
 			nil,
-			&oldAcl,
+			&oldACL,
 			nil,
 			&secDesc,
 		)
@@ -29,7 +35,7 @@ func Apply(name string, replace, inherit bool, entries ...api.ExplicitAccess) er
 	var acl windows.Handle
 	if err := api.SetEntriesInAcl(
 		entries,
-		oldAcl,
+		oldACL,
 		&acl,
 	); err != nil {
 		return err
