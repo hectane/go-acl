@@ -12,6 +12,12 @@ import (
 // parameter is true, the file will inherit ACEs from its parent.
 func Apply(name string, replace, inherit bool, owner, group *windows.SID, entries ...api.ExplicitAccess) error {
 	var oldACL windows.Handle
+	if owner != nil {
+		pSecurityDescriptor := api.MakeNewSecurityDescriptor()
+		InitializeSecurityDescriptor(pSecurityDescriptor, api.SECURITY_DESCRIPTOR_REVISION)
+		SetSecurityDescriptorOwner(pSecurityDescriptor, owner, true)
+		SetFileSecurity(name, api.OWNER_SECURITY_INFORMATION, pSecurityDescriptor)
+	}
 	if !replace {
 		var secDesc windows.Handle
 		api.GetNamedSecurityInfo(
@@ -41,15 +47,12 @@ func Apply(name string, replace, inherit bool, owner, group *windows.SID, entrie
 	} else {
 		secInfo = api.UNPROTECTED_DACL_SECURITY_INFORMATION
 	}
-	if owner != nil {
-		secInfo |= api.OWNER_SECURITY_INFORMATION
-	}
 	return api.SetNamedSecurityInfo(
 		name,
 		api.SE_FILE_OBJECT,
 		api.DACL_SECURITY_INFORMATION|secInfo,
-		owner,
-		group,
+		nil,
+		nil,
 		acl,
 		0,
 	)
