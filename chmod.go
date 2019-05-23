@@ -9,7 +9,7 @@ import (
 // Change the permissions of the specified file. Only the nine
 // least-significant bytes are used, allowing access by the file's owner, the
 // file's group, and everyone else to be explicitly controlled.
-func Chmod(name string, mode os.FileMode) error {
+func Chmod(name string, fileMode os.FileMode) error {
 	// https://support.microsoft.com/en-us/help/243330/well-known-security-identifiers-in-windows-operating-systems
 	creatorOwnerSID, err := windows.StringToSid("S-1-3-0")
 	if err != nil {
