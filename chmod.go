@@ -24,12 +24,13 @@ func Chmod(name string, mode os.FileMode) error {
 		return err
 	}
 
+	mode := uint32(fileMode)
 	return Apply(
 		name,
 		true,
 		false,
-		GrantSid((uint32(mode)&0700)<<23, creatorOwnerSID),
-		GrantSid((uint32(mode)&0070)<<26, creatorGroupSID),
-		GrantSid((uint32(mode)&0007)<<29, everyoneSID),
+		GrantSid(((mode&0700)<<23)|((mode&0200)<<9), creatorOwnerSID),
+		GrantSid(((mode&0070)<<26)|((mode&0020)<<12), creatorGroupSID),
+		GrantSid(((mode&0007)<<29)|((mode&0002)<<15), everyoneSID),
 	)
 }
