@@ -63,7 +63,9 @@ const (
 )
 
 var (
-	procSetEntriesInAclW = advapi32.MustFindProc("SetEntriesInAclW")
+	procSetEntriesInAclW           = advapi32.MustFindProc("SetEntriesInAclW")
+	procGetEffectiveRightsFromAclW = advapi32.MustFindProc("GetEffectiveRightsFromAclW")
+	procGetExplicitEntriesFromAclW = advapi32.MustFindProc("GetExplicitEntriesFromAclW")
 )
 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/aa379636.aspx
@@ -95,4 +97,64 @@ func SetEntriesInAcl(entries []ExplicitAccess, oldAcl windows.Handle, newAcl *wi
 		return windows.Errno(ret)
 	}
 	return nil
+}
+
+func GetEffectiveRightsFromAcl(oldAcl windows.Handle, sid *windows.SID) (uint32, error) {
+	trustee := Trustee{
+		TrusteeForm: TRUSTEE_IS_SID,
+		Name:        (*uint16)(unsafe.Pointer(sid)),
+	}
+
+	var rights uint32
+
+	ret, _, err := procGetEffectiveRightsFromAclW.Call(
+		uintptr(oldAcl),
+		uintptr(unsafe.Pointer(&trustee)),
+		uintptr(unsafe.Pointer(&rights)),
+	)
+
+	if ret != 0 {
+		return 0, err
+	}
+	return rights, nil
+}
+
+func GetExplicitEntriesFromAcl(oldAcl windows.Handle) ([]ExplicitAccess, error) {
+	var (
+		count uint32
+		list  uintptr
+	)
+
+	/* TODO: seems like I ought to be able to something like this:
+	     var entries *[]ExplicitAccess
+	     ret, _, err := procGetExplicitEntriesFromAclW.Call(
+	         ...,
+	         uintptr(unsafe.Pointer(&entries)),
+	     )
+	   but I couldn't figure out how to make it work.  I tried a whole
+	   bunch of different combinations but I only ever managed to get an empty list
+	*/
+	ret, _, err := procGetExplicitEntriesFromAclW.Call(
+		uintptr(oldAcl),
+		uintptr(unsafe.Pointer(&count)),
+		uintptr(unsafe.Pointer(&list)),
+	)
+
+	if ret != 0 {
+		return []ExplicitAccess{}, err
+	}
+
+	defer windows.LocalFree(windows.Handle(unsafe.Pointer(list)))
+
+	explicitAccessSize := unsafe.Sizeof(ExplicitAccess{})
+	getEntryAtOffset := func(list uintptr, offset uint32) ExplicitAccess {
+		return *(*ExplicitAccess)(unsafe.Pointer(list + explicitAccessSize*uintptr(offset)))
+	}
+
+	output := make([]ExplicitAccess, count)
+	for i := uint32(0); i < count; i++ {
+		output[i] = getEntryAtOffset(list, i)
+	}
+
+	return output, nil
 }
