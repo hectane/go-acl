@@ -1,4 +1,4 @@
-//+build windows
+//go:build windows
 
 package acl
 
@@ -6,13 +6,12 @@ import (
 	"golang.org/x/sys/windows"
 
 	"errors"
-	"io/ioutil"
 	"os"
 	"testing"
 )
 
 func TestApply(t *testing.T) {
-	f, err := ioutil.TempFile(os.TempDir(), "")
+	f, err := os.CreateTemp(os.TempDir(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
